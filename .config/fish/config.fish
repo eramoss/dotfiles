@@ -1,3 +1,5 @@
+export SUDO_EDITOR="nvim"
+
 function fish_prompt -d "Write out the prompt"
     # This shows up as USER@HOST /home/user/ >, with the directory colored
     # $USER and $hostname are set by fish, so you can just use them
@@ -50,7 +52,7 @@ alias mountg="rclone mount --daemon google: ~/Google\\ drive"
 alias ua-drop-caches='sudo paccache -rk3; yay -Sc --aur --noconfirm'
 alias ua-update-all='export TMPFILE="$(mktemp)"; \
     sudo true; \
-    rate-mirrors --save=$TMPFILE manjaro --max-delay=21600 \
+    rate-mirrors --save=$TMPFILE arch --max-delay=21600 \
       && sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist-backup \
       && sudo mv $TMPFILE /etc/pacman.d/mirrorlist \
       && ua-drop-caches \
@@ -58,3 +60,32 @@ alias ua-update-all='export TMPFILE="$(mktemp)"; \
 
 alias fresh-git="find . -mindepth 1 -not -path './.git*' -delete && git restore ."
 alias git-dot='git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+
+
+function vpn_connect
+    if test (count $argv) -ne 1
+        echo "Usage: vpn_connect <path-to-config.ovpn>"
+        return 1
+    end
+
+    set config_file $argv[1]
+
+    # Disable IPv6
+    echo "Disabling IPv6..."
+    sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+    sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
+
+    # Run OpenVPN
+    echo "Starting OpenVPN..."
+    sudo openvpn --config $config_file
+
+    # When OpenVPN exits, re-enable IPv6
+    echo "Re-enabling IPv6..."
+    sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0
+    sudo sysctl -w net.ipv6.conf.default.disable_ipv6=0
+
+    echo "VPN disconnected. IPv6 restored."
+end
+
+
+export CXXFLAGS="-include cstdint"
