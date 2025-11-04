@@ -196,28 +196,29 @@ require('gitsigns').setup{
 vim.keymap.set('v', '<C-c>', '"+y', {noremap=true, silent=true})
 vim.keymap.set('n', '<C-v>', '"+p', {noremap=true, silent=true})
 vim.keymap.set('i', '<C-v>', '<Esc>"+pa', {noremap=true, silent=true})
+
 vim.keymap.set('i', '<C-s>', '<Esc>:w<CR>')
 vim.keymap.set('n', '<C-s>', ':w<CR>')
 vim.keymap.set('i', '<C-q>', '<Esc>:q<CR>i')
 vim.keymap.set('n', '<C-q>', ':q<CR>')
+
 vim.keymap.set('i', '<C-z>', '<Esc>:u<CR>i')
 vim.keymap.set('n', '<C-z>', ':u<CR>')
 vim.keymap.set('i', '<C-y>', '<Esc>:redo<CR>i')
 vim.keymap.set('n', '<C-y>', ':redo<CR>')
+
 vim.keymap.set('n', '<C-b>', ':NvimTreeToggle<CR>')
+
 vim.keymap.set('n', '<leader>n', ':nohlsearch<CR>', { silent = true })
-vim.keymap.set('n', 'n', 'nzz', { silent = true })
-vim.keymap.set('n', 'N', 'Nzz', { silent = true })
-vim.keymap.set('n', '*', '*zz', { silent = true })
-vim.keymap.set('n', '#', '#zz', { silent = true })
-vim.keymap.set('n', 'g*', 'g*zz', { silent = true })
+
+vim.keymap.set('n', '<C-h>', function()
+  vim.system({ 'kitty', '@', 'launch', '--type=tab', '--cwd=current' })
+end, { noremap = true, silent = true, desc = "Open new Kitty tab" })
 
 local telescope_builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', telescope_builtin.find_files, { desc = 'Telescope find files' })
 vim.keymap.set('n', '<leader>fg', telescope_builtin.live_grep, { desc = 'Telescope live grep' })
-vim.keymap.set('n', '<leader>fb', telescope_builtin.buffers, { desc = 'Telescope buffers' })
-vim.keymap.set('n', '<leader>fh', telescope_builtin.help_tags, { desc = 'Telescope help tags' })
-
+vim.api.nvim_set_keymap('n', '<leader>e', '<cmd>lua vim.diagnostic.open_float()<CR>', { noremap = true, silent = true })
 --
 
 -- AutoCmds
