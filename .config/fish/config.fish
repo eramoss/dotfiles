@@ -63,28 +63,23 @@ alias git-dot='git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 
 
 function vpn_connect
-    if test (count $argv) -ne 1
-        echo "Usage: vpn_connect <path-to-config.ovpn>"
-        return 1
-    end
-
-    set config_file $argv[1]
-
-    # Disable IPv6
-    echo "Disabling IPv6..."
+    # Disable IPv6 and geoclue 
+    echo "Disabling IPv6 and geoclue..."
+		sudo systemctl stop geoclue
     sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
     sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
 
     # Run OpenVPN
     echo "Starting OpenVPN..."
-    sudo openvpn --config $config_file
+    sudo openvpn --config $argv
 
-    # When OpenVPN exits, re-enable IPv6
-    echo "Re-enabling IPv6..."
+    # When OpenVPN exits, re-enable IPv6 and geoclue
+    echo "Re-enabling IPv6 and geoclue..."
     sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0
     sudo sysctl -w net.ipv6.conf.default.disable_ipv6=0
-
-    echo "VPN disconnected. IPv6 restored."
+		
+		sudo systemctl start geoclue
+    echo "VPN disconnected. IPv6 and geoclue restored."
 end
 
 
