@@ -34,35 +34,35 @@ vim.call('plug#end')
 
 -- Theme
 require("nvim-tree").setup({
-  sort = {
-    sorter = "case_sensitive",
-  },
-  view = {
-    width = 30,
-  },
-  renderer = {
-    group_empty = true,
-  },
+	sort = {
+		sorter = "case_sensitive",
+	},
+	view = {
+		width = 30,
+	},
+	renderer = {
+		group_empty = true,
+	},
 })
 vim.o.background = "dark" 
 vim.cmd([[colorscheme gruvbox]])
 vim.o.showmode = false
 vim.g.lightline = {
-		colorscheme = 'wombat',
-		active = {
-				left = {
-						{ 'mode', 'paste' },
-						{ 'readonly', 'filename', 'modified' }
-				},
-				right = {
-						{ 'lineinfo' },
-						{ 'percent' },
-						{ 'fileencoding', 'filetype' },
-				},
+	colorscheme = 'wombat',
+	active = {
+		left = {
+			{ 'mode', 'paste' },
+			{ 'readonly', 'filename', 'modified' }
 		},
-		component_function = {
-				filename = 'LightlineFilename',
+		right = {
+			{ 'lineinfo' },
+			{ 'percent' },
+			{ 'fileencoding', 'filetype' },
 		},
+	},
+	component_function = {
+		filename = 'LightlineFilename',
+	},
 }
 
 function LightlineFilenameInLua(opts)
@@ -87,81 +87,70 @@ vim.api.nvim_exec(
 
 -- Code shit
 --
- require'nvim-treesitter'.setup {
-  ensure_installed = "all",
-  sync_install = false,
-  auto_install = true,
-  ignore_install = {"hoon", "teal", "t32", "jsonc", "fusion", "ipkg", "blueprint"},
-}
-
-
-local excluded_filetypes = { 'help', 'quickfix', 'nofile', 'NvimTree', 'cmp_menu' } 
+langs = {'rust', 'c', 'lua', 'zig', 'javascript', 'java', 'cpp', 'json', 'php', 'python', 'elixir', 'erlang', 'go','bash', 'fish'}
+require'nvim-treesitter'.install(langs)
 
 vim.api.nvim_create_autocmd('FileType', {
-    pattern = '*',
-    callback = function()
-        local ft = vim.bo.filetype
-        -- Check if the current file type is not in the excluded list
-        if not vim.tbl_contains(excluded_filetypes, ft) then
-            vim.treesitter.start()
-            vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-        end
-    end,
+	pattern = langs,
+	callback = function()
+		vim.treesitter.start()
+		vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+	end,
 })
 
 local cmp = require("cmp")
 
 cmp.setup({
-  snippet = {
-    expand = function(args)
-      -- LazyVim uses built-in vim.snippet by default
-      vim.snippet.expand(args.body)
-    end,
-  },
+	snippet = {
+		expand = function(args)
+			-- LazyVim uses built-in vim.snippet by default
+			vim.snippet.expand(args.body)
+		end,
+	},
 
-  mapping = cmp.mapping.preset.insert({
-    ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-    ["<C-f>"] = cmp.mapping.scroll_docs(4),
-    ["<C-Space>"] = cmp.mapping.complete(),
-    ["<C-e>"] = cmp.mapping.abort(),
-    ["<CR>"] = cmp.mapping.confirm({
-      select = true,
-      behavior = cmp.ConfirmBehavior.Insert,
-    }),
-  }),
+	mapping = cmp.mapping.preset.insert({
+		["<C-b>"] = cmp.mapping.scroll_docs(-4),
+		["<C-f>"] = cmp.mapping.scroll_docs(4),
+		["<C-Space>"] = cmp.mapping.complete(),
+		["<C-e>"] = cmp.mapping.abort(),
+		["<CR>"] = cmp.mapping.confirm({
+			select = true,
+			behavior = cmp.ConfirmBehavior.Insert,
+		}),
+	}),
 
-  sources = cmp.config.sources({
-    { name = "nvim_lsp" },
-  }, {
-    { name = "path" },
-    { name = "buffer" },
-  }),
+	sources = cmp.config.sources({
+		{ name = "nvim_lsp" },
+	}, {
+			{ name = "path" },
+			{ name = "buffer" },
+		}),
 
-  experimental = {
-    ghost_text = true,
-  },
+	experimental = {
+		ghost_text = true,
+	},
 })
 
 -- command-line completion (for : paths)
 cmp.setup.cmdline(":", {
-  sources = cmp.config.sources({
-    { name = "path" }
-  })
+	sources = cmp.config.sources({
+		{ name = "path" }
+	})
 })
 
 require('Comment').setup()
 vim.lsp.enable('ruff', {})
 vim.lsp.enable('pyright', {})
 vim.lsp.config('pyright', {
-  settings = {
-    python = {
-      analysis = {
-        typeCheckingMode = "basic", -- or "strict"
-        autoSearchPaths = true,
-        useLibraryCodeForTypes = true,
-      },
-    },
-  },
+	settings = {
+		python = {
+			analysis = {
+				typeCheckingMode = "basic", -- or "strict"
+				autoSearchPaths = true,
+				useLibraryCodeForTypes = true,
+			},
+		},
+	},
 })
 vim.lsp.enable('clangd', {})
 vim.lsp.enable('rust_analyzer', {})
@@ -196,17 +185,17 @@ vim.g.rust_analyzer_on_save = true
 vim.lsp.enable('quick_lint_js', {})
 vim.lsp.enable('zls', {})
 vim.lsp.config('zls', {
-  settings = {
-    zls = {
-      enable_build_on_save = true,
-    },
-  },
+	settings = {
+		zls = {
+			enable_build_on_save = true,
+		},
+	},
 })
 vim.lsp.enable('gopls', {})
 vim.lsp.enable('phpactor', {})
 vim.lsp.enable('elixirls', {})
 vim.lsp.config('elixirls', {
-  cmd = { "/usr/lib/elixir-ls/language_server.sh" },
+	cmd = { "/usr/lib/elixir-ls/language_server.sh" },
 })
 
 -- Global mappings.
@@ -243,16 +232,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 		local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
-		-- TODO: find some way to make this only apply to the current line.
-		if client.server_capabilities.inlayHintProvider then
-			vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
-		end
-
-
-		-- None of this semantics tokens business.
-		-- https://www.reddit.com/r/neovim/comments/143efmd/is_it_possible_to_disable_treesitter_completely/
-		client.server_capabilities.semanticTokensProvider = nil
-
 		-- format on save for Rust
 		if client.server_capabilities.documentFormattingProvider then
 			vim.api.nvim_create_autocmd("BufWritePre", {
@@ -268,13 +247,13 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 
 vim.api.nvim_create_autocmd('BufWritePre',{
-  pattern = {"*.zig", "*.zon"},
-  callback = function(ev)
-    vim.lsp.buf.code_action({
-      context = { only = { "source.organizeImports" } },
-      apply = true,
-    })
-  end
+	pattern = {"*.zig", "*.zon"},
+	callback = function(ev)
+		vim.lsp.buf.code_action({
+			context = { only = { "source.organizeImports" } },
+			apply = true,
+		})
+	end
 })
 
 --
@@ -284,41 +263,41 @@ require('gitsigns').setup{
 	current_line_blame = true,
 
 	on_attach = function(bufnr)
-    local gitsigns = require('gitsigns')
+		local gitsigns = require('gitsigns')
 		local function map(mode, l, r, opts)
-      opts = opts or {}
-      opts.buffer = bufnr
-      vim.keymap.set(mode, l, r, opts)
-    end
+			opts = opts or {}
+			opts.buffer = bufnr
+			vim.keymap.set(mode, l, r, opts)
+		end
 
-    -- Navigation
-    map('n', ']c', function()
-      if vim.wo.diff then
-        vim.cmd.normal({']c', bang = true})
-      else
-        gitsigns.nav_hunk('next')
-      end
-    end)
+		-- Navigation
+		map('n', ']c', function()
+			if vim.wo.diff then
+				vim.cmd.normal({']c', bang = true})
+			else
+				gitsigns.nav_hunk('next')
+			end
+		end)
 
-    map('n', '[c', function()
-      if vim.wo.diff then
-        vim.cmd.normal({'[c', bang = true})
-      else
-        gitsigns.nav_hunk('prev')
-      end
-    end)
+		map('n', '[c', function()
+			if vim.wo.diff then
+				vim.cmd.normal({'[c', bang = true})
+			else
+				gitsigns.nav_hunk('prev')
+			end
+		end)
 
-    -- Actions
-    map('n', '<leader>gs', gitsigns.stage_hunk)
-    map('n', '<leader>gr', gitsigns.reset_hunk)
-    map('v', '<leader>gs', function() gitsigns.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
-    map('v', '<leader>gr', function() gitsigns.reset_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
-    map('n', '<leader>gu', gitsigns.undo_stage_hunk)
-    map('n', '<leader>gp', gitsigns.preview_hunk)
-    map('n', '<leader>gb', function() gitsigns.blame_line{full=true} end)
-    map('n', '<leader>gtb', gitsigns.toggle_current_line_blame)
-    map('n', '<leader>gd', gitsigns.diffthis)
-    map('n', '<leader>gD', function() gitsigns.diffthis('~') end)
+		-- Actions
+		map('n', '<leader>gs', gitsigns.stage_hunk)
+		map('n', '<leader>gr', gitsigns.reset_hunk)
+		map('v', '<leader>gs', function() gitsigns.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
+		map('v', '<leader>gr', function() gitsigns.reset_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
+		map('n', '<leader>gu', gitsigns.undo_stage_hunk)
+		map('n', '<leader>gp', gitsigns.preview_hunk)
+		map('n', '<leader>gb', function() gitsigns.blame_line{full=true} end)
+		map('n', '<leader>gtb', gitsigns.toggle_current_line_blame)
+		map('n', '<leader>gd', gitsigns.diffthis)
+		map('n', '<leader>gD', function() gitsigns.diffthis('~') end)
 
 	end
 }
@@ -345,19 +324,19 @@ vim.keymap.set('n', '<C-b>', ':NvimTreeToggle<CR>')
 vim.keymap.set('n', '<leader>n', ':nohlsearch<CR>', { silent = true })
 
 vim.keymap.set('n', '<C-h>', function()
-  vim.system({ 'kitty', '@', 'launch', '--type=tab', '--cwd=current' })
+	vim.system({ 'kitty', '@', 'launch', '--type=tab', '--cwd=current' })
 end, { noremap = true, silent = true, desc = "Open new Kitty tab" })
 
 local telescope_builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', telescope_builtin.find_files, { desc = 'Telescope find files' })
 vim.keymap.set('n', '<leader>fg', telescope_builtin.live_grep, { desc = 'Telescope live grep' })
 vim.keymap.set(
-  'n',
-  '<leader>fe',
-  function()
-    require('telescope.builtin').diagnostics({ bufnr = 0 })
-  end,
-  { desc = 'Telescope LSP diagnostics (workspace)' }
+	'n',
+	'<leader>fe',
+	function()
+		require('telescope.builtin').diagnostics({ bufnr = 0 })
+	end,
+	{ desc = 'Telescope LSP diagnostics (workspace)' }
 )
 --
 

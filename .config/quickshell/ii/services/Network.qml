@@ -6,7 +6,7 @@ pragma ComponentBehavior: Bound
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import "./network"
+import qs.services.network
 
 /**
  * Network service with nmcli.
@@ -23,6 +23,13 @@ Singleton {
     property WifiAccessPoint wifiConnectTarget
     readonly property list<WifiAccessPoint> wifiNetworks: []
     readonly property WifiAccessPoint active: wifiNetworks.find(n => n.active) ?? null
+    readonly property list<var> friendlyWifiNetworks: [...wifiNetworks].sort((a, b) => {
+        if (a.active && !b.active)
+            return -1;
+        if (!a.active && b.active)
+            return 1;
+        return b.strength - a.strength;
+    })
     property string wifiStatus: "disconnected"
 
     property string networkName: ""
