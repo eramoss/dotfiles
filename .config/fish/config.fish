@@ -46,6 +46,7 @@ alias nvim-config="nvim ~/.config/nvim/init.lua"
 alias fish-config="nvim ~/.config/fish/config.fish"
 alias ushell="source ~/.config/fish/config.fish"
 alias rm-orphans 'sudo pacman -Rns (pacman -Qdtq)'
+alias add-orphans 'sudo pacman -D --asexplicit (pacman -Qdtq)'
 alias tlauncher="prime-run java -jar /opt/tlauncher/TLauncher.jar > /dev/null"
 alias mountg="rclone mount --daemon google: ~/Google\\ drive"
 # update pacman mirrors
