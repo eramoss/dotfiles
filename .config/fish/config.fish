@@ -40,6 +40,7 @@ if not contains $_asdf_shims $PATH
     set -gx --prepend PATH $_asdf_shims
 end
 set --erase _asdf_shims
+source (echo $ASDF_DATA_DIR | if test -z $it; echo $HOME/.asdf; else echo $it; end)/plugins/golang/set-env.fish
 
 
 alias nvim-config="nvim ~/.config/nvim/init.lua"
@@ -61,8 +62,10 @@ alias ua-update-all='export TMPFILE="$(mktemp)"; \
 
 alias fresh-git="find . -mindepth 1 -not -path './.git*' -delete && git restore ."
 alias git-dot='git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
-
-
+alias pls='eval sudo $history[1]'
+alias nsanim="bash -c 'netanim -style fusion -stylesheet <(echo \"QWidget { background-color: white; color: black; }\")'"
+alias ns3="/opt/ns-allinone-3.46.1/ns-3.46.1/ns3"
+alias opencode="~/.opencode/bin/opencode"
 function vpn_connect
     # Disable IPv6 and geoclue 
     echo "Disabling IPv6 and geoclue..."

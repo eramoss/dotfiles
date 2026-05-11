@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
-
 SOURCE="eDP-1"
 TARGET="HDMI-A-1"
 
-# Check if currently mirrored
-if hyprctl monitors all | grep "monitor mirrors"; then
-    # Turn off mirror, enable as normal extended or off
-    hyprctl reload
+apply_workspaces() {
+    sleep 0.5  # give Hyprland time to register the monitor
+    hyprctl dispatch moveworkspacetomonitor "1 HDMI-A-1"
+    hyprctl dispatch moveworkspacetomonitor "2 HDMI-A-1"
+    hyprctl dispatch moveworkspacetomonitor "3 HDMI-A-1"
+    hyprctl dispatch moveworkspacetomonitor "4 eDP-1"
+    hyprctl dispatch moveworkspacetomonitor "5 eDP-1"
+}
+
+
+if hyprctl monitors all | grep -q "monitor mirrors"; then
+    hyprctl keyword monitor "$TARGET, preferred, 0x0, 0.75"
     notify-send "Hyprland" "Mirroring disabled"
+    apply_workspaces
 else
-    # Mirror the target from the source
-		hyprctl keyword monitor $TARGET, preferred, auto, 1, mirror, $SOURCE
+    hyprctl keyword monitor "$TARGET, preferred, auto, 1, mirror, $SOURCE"
     notify-send "Hyprland" "Mirroring $SOURCE → $TARGET"
+    reload_quickshell
 fi

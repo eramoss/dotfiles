@@ -7,16 +7,15 @@ vim.opt.wrap = false
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 vim.opt.termguicolors = true
-
 vim.opt.clipboard = "unnamedplus"
 --
-
 
 -- Plugins
 local Plug = vim.fn['plug#']
 vim.call('plug#begin')
-Plug 'tpope/vim-sensible'
+Plug 'micangl/cmp-vimtex'
 Plug 'nvim-lua/plenary.nvim'
+Plug 'lervag/vimtex'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'ellisonleao/gruvbox.nvim'
@@ -86,8 +85,7 @@ vim.api.nvim_exec(
 --
 
 -- Code shit
---
-langs = {'rust', 'c', 'lua', 'zig', 'javascript', 'java', 'cpp', 'json', 'php', 'python', 'elixir', 'erlang', 'go','bash', 'fish'}
+langs = {'rust', 'c', 'lua', 'zig', 'javascript', 'java', 'cpp', 'json', 'php', 'python', 'elixir', 'erlang', 'go','bash', 'fish', 'lua', 'vim', 'vimdoc'}
 require'nvim-treesitter'.install(langs)
 
 vim.api.nvim_create_autocmd('FileType', {
@@ -99,18 +97,14 @@ vim.api.nvim_create_autocmd('FileType', {
 })
 
 local cmp = require("cmp")
-
 cmp.setup({
 	snippet = {
 		expand = function(args)
-			-- LazyVim uses built-in vim.snippet by default
 			vim.snippet.expand(args.body)
 		end,
 	},
 
 	mapping = cmp.mapping.preset.insert({
-		["<C-b>"] = cmp.mapping.scroll_docs(-4),
-		["<C-f>"] = cmp.mapping.scroll_docs(4),
 		["<C-Space>"] = cmp.mapping.complete(),
 		["<C-e>"] = cmp.mapping.abort(),
 		["<CR>"] = cmp.mapping.confirm({
@@ -121,6 +115,7 @@ cmp.setup({
 
 	sources = cmp.config.sources({
 		{ name = "nvim_lsp" },
+		{ name = "vimtex" },
 	}, {
 			{ name = "path" },
 			{ name = "buffer" },
@@ -131,7 +126,6 @@ cmp.setup({
 	},
 })
 
--- command-line completion (for : paths)
 cmp.setup.cmdline(":", {
 	sources = cmp.config.sources({
 		{ name = "path" }
@@ -139,6 +133,16 @@ cmp.setup.cmdline(":", {
 })
 
 require('Comment').setup()
+local esc = vim.api.nvim_replace_termcodes('<ESC>', true, false, true)
+vim.keymap.set('x', '<leader>\\', function()
+    vim.api.nvim_feedkeys(esc, 'nx', false)
+    require('Comment.api').toggle.linewise(vim.fn.visualmode())
+end, { desc = 'Toggle comment for selection' })
+
+vim.keymap.set('n', '<leader>\\', function()
+    require('Comment.api').toggle.linewise.current()
+end, { desc = 'Toggle comment for current line' })
+
 vim.lsp.enable('ruff', {})
 vim.lsp.enable('pyright', {})
 vim.lsp.config('pyright', {
@@ -182,7 +186,43 @@ vim.lsp.config('rust_analyzer', {
 
 
 vim.g.rust_analyzer_on_save = true
-vim.lsp.enable('quick_lint_js', {})
+
+
+local tsserver_filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" }
+local vue_plugin = {
+	name = "@vue/typescript-plugin",
+	location = vim.fn.exepath("vue-language-server"),
+	languages = { "vue" },
+	configNamespace = "typescript",
+}
+
+vim.lsp.config("vtsls", {
+	settings = {
+		vtsls = {
+			tsserver = {
+				globalPlugins = {
+					vue_plugin,
+				},
+			},
+		},
+	},
+	filetypes = tsserver_filetypes,
+})
+
+vim.lsp.config("ts_ls", {
+	init_options = {
+		plugins = {
+			vue_plugin,
+		},
+	},
+	filetypes = tsserver_filetypes,
+})
+
+vim.lsp.enable({
+	"ts_ls",
+	"vue_ls",
+})
+
 vim.lsp.enable('zls', {})
 vim.lsp.config('zls', {
 	settings = {
@@ -198,37 +238,25 @@ vim.lsp.config('elixirls', {
 	cmd = { "/usr/lib/elixir-ls/language_server.sh" },
 })
 
--- Global mappings.
--- See `:help vim.diagnostic.*` for documentation on any of the below functions
+
+
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
 
--- Use LspAttach autocommand to only map the following keys
--- after the language server attaches to the current buffer
+
 vim.api.nvim_create_autocmd('LspAttach', {
 	group = vim.api.nvim_create_augroup('UserLspConfig', {}),
 	callback = function(ev)
 		vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
 
-		-- Buffer local mappings.
-		-- See `:help vim.lsp.*` for documentation on any of the below functions
+
 		local opts = { buffer = ev.buf }
-		vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-		vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-		vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
-		vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
-		vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
-		vim.keymap.set('n', '<leader>wl', function()
-			print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-		end, opts)
+		vim.keymap.set('n', '<C-Space>', vim.lsp.buf.hover, opts)
+		vim.keymap.set('n', 'fi', vim.lsp.buf.implementation, opts)
+
 		vim.keymap.set('n', '<leader>r', vim.lsp.buf.rename, opts)
 		vim.keymap.set({ 'n', 'v' }, '<leader>a', vim.lsp.buf.code_action, opts)
-		vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-		vim.keymap.set('n', '<leader>f', function()
-			vim.lsp.buf.format { async = true }
-		end, opts)
+		vim.keymap.set('n', 'fr', vim.lsp.buf.references, opts)
 
 		local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
@@ -256,6 +284,8 @@ vim.api.nvim_create_autocmd('BufWritePre',{
 	end
 })
 
+
+vim.g.vimtex_view_method = 'zathura'
 --
 
 -- Plugin settings
@@ -271,7 +301,7 @@ require('gitsigns').setup{
 		end
 
 		-- Navigation
-		map('n', ']c', function()
+		map('n', 'gn', function()
 			if vim.wo.diff then
 				vim.cmd.normal({']c', bang = true})
 			else
@@ -279,7 +309,7 @@ require('gitsigns').setup{
 			end
 		end)
 
-		map('n', '[c', function()
+		map('n', 'gp', function()
 			if vim.wo.diff then
 				vim.cmd.normal({'[c', bang = true})
 			else
@@ -298,10 +328,8 @@ require('gitsigns').setup{
 		map('n', '<leader>gtb', gitsigns.toggle_current_line_blame)
 		map('n', '<leader>gd', gitsigns.diffthis)
 		map('n', '<leader>gD', function() gitsigns.diffthis('~') end)
-
 	end
 }
-
 --
 
 -- keymaps
@@ -322,10 +350,6 @@ vim.keymap.set('n', '<C-y>', ':redo<CR>')
 vim.keymap.set('n', '<C-b>', ':NvimTreeToggle<CR>')
 
 vim.keymap.set('n', '<leader>n', ':nohlsearch<CR>', { silent = true })
-
-vim.keymap.set('n', '<C-h>', function()
-	vim.system({ 'kitty', '@', 'launch', '--type=tab', '--cwd=current' })
-end, { noremap = true, silent = true, desc = "Open new Kitty tab" })
 
 local telescope_builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', telescope_builtin.find_files, { desc = 'Telescope find files' })
@@ -357,6 +381,33 @@ vim.api.nvim_create_autocmd(
 		end
 	}
 )
---
 
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "latex", "tex", "markdown", "md" },
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+    
+    vim.opt_local.breakindent = true
+    
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = { "pt", "en" }
+  end,
+})
+
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = {"latex", "tex"},
+  callback = function()
+		local cmp = require("cmp")
+		cmp.setup({
+			sources = cmp.config.sources({
+				{ name = "vimtex" },
+			}, {
+				}),
+
+		})
+	end,
+})
+--
 
